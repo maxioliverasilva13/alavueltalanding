@@ -16,6 +16,7 @@ import type { LandingEmpresaData, LandingProducto, LandingServicio } from "@/lib
 import { colors } from "@/lib/colors";
 import LoginModal from "../LoginModal";
 import CardService, { CardHour } from "../ui/CardService";
+import CardProduct from "../ui/CardProduct";
 import Calendar from "../ui/Calendar";
 import FormStepper from "../ui/FormStepper";
 import PaymentMethodPicker from "../ui/PaymentMethodPicker";
@@ -525,21 +526,21 @@ export default function LandingBooking({ data }: Props) {
               {step === 0 && (
                 <div id="productos" className="space-y-4">
                   {cartLoading && <p className="text-sm text-gray-400">Actualizando carrito...</p>}
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {productos.map((p) => {
-                      const qty = getProductQty(p.id);
-                      return (
-                        <div key={p.id} className="rounded-xl border border-gray-100 p-4">
-                          <p className="font-semibold text-gray-900">{p.nombre}</p>
-                          <p className="mt-1 text-sm font-bold text-[#7F77DD]">{formatPrice(Number(p.precio), p.divisa)}</p>
-                          <div className="mt-3 flex items-center gap-2">
-                            <button type="button" onClick={() => void syncCartQty(p, Math.max(0, qty - 1))} className="rounded-lg border px-2 py-1 text-sm">−</button>
-                            <span className="w-6 text-center text-sm font-semibold">{qty}</span>
-                            <button type="button" onClick={() => void syncCartQty(p, qty + 1)} className="rounded-lg border px-2 py-1 text-sm">+</button>
-                          </div>
-                        </div>
-                      );
-                    })}
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {productos.map((p) => (
+                      <CardProduct
+                        key={p.id}
+                        id={p.id}
+                        name={p.nombre}
+                        description={p.descripcion}
+                        photo={p.foto}
+                        price={p.precio}
+                        currency={p.divisa}
+                        soldOut={p.agotado}
+                        quantity={getProductQty(p.id)}
+                        onChangeQuantity={(qty) => void syncCartQty(p, qty)}
+                      />
+                    ))}
                   </div>
                   {(carrito?.items.length ?? 0) > 0 && (
                     <button type="button" onClick={() => setStep(1)} className="h-12 w-full rounded-2xl font-semibold text-white" style={{ background: colors.primary }}>
