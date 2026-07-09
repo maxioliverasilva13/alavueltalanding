@@ -7,6 +7,8 @@ const nextConfig: NextConfig = {
     "*.localhost",
     "alavueltaapp.com",
     "*.alavueltaapp.com",
+    "alavueltaapp.pro",
+    "*.alavueltaapp.pro",
   ],
 };
 

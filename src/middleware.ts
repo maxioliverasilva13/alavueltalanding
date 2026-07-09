@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "alavueltaapp.com";
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "alavueltaapp.pro";
 
 function extractSubdomain(host: string): string | null {
   const hostWithoutPort = host.split(":")[0].toLowerCase();
@@ -17,7 +17,7 @@ function extractSubdomain(host: string): string | null {
     return sub && sub !== "www" ? sub : null;
   }
 
-  // Producción o dev con hosts: maxi-pro.alavueltaapp.com
+  // Producción o dev con hosts: maxi-pro.alavueltaapp.pro
   if (hostWithoutPort.endsWith(`.${rootWithoutPort}`)) {
     const sub = hostWithoutPort.slice(0, -`.${rootWithoutPort}`.length);
     return sub && sub !== "www" ? sub : null;
