@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: "standalone",
+  allowedDevOrigins: [
+    "localhost",
+    "*.localhost",
+    "alavueltaapp.com",
+    "*.alavueltaapp.com",
+  ],
 };
 
 export default nextConfig;

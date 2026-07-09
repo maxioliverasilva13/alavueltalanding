@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Fixeo Landing
 
-## Getting Started
+Landing page server-side (Next.js) por subdominio para empresas con plan que incluye `tiene_landing_page`.
 
-First, run the development server:
+## Desarrollo
 
 ```bash
+cp .env.example .env.local
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+El servidor corre en el puerto **5001**.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Opciones en desarrollo:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `http://maxi-pro.localhost:5001` — subdominio desde el host (sin editar `/etc/hosts`)
+- `http://maxi-pro.alavueltaapp.com:5001` — agregá en `/etc/hosts`: `127.0.0.1 maxi-pro.alavueltaapp.com`
+- `http://localhost:5001?subdomain=maxi-pro` — query param de respaldo
 
-## Learn More
+## Variables
 
-To learn more about Next.js, take a look at the following resources:
+- `NEXT_PUBLIC_API_URL` — URL del backend (ej. `http://localhost:8000/api`)
+- `NEXT_PUBLIC_DEFAULT_SUBDOMAIN` — subdominio por defecto en dev
+- `NEXT_PUBLIC_ROOT_DOMAIN` — dominio raíz para detectar subdominios en producción
+- Firebase (`NEXT_PUBLIC_FIREBASE_*`) — mismo proyecto que `fixeo_FE` (`android/app/google-services.json`):
+  - `API_KEY`, `PROJECT_ID`, `STORAGE_BUCKET`, `MESSAGING_SENDER_ID` salen del JSON
+  - `AUTH_DOMAIN` = `{PROJECT_ID}.firebaseapp.com`
+  - `APP_ID` debe ser el de la **app Web** en Firebase Console (`1:…:web:…`), no el `mobilesdk_app_id` Android
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+En Firebase Console → Authentication → Settings → Authorized domains, agregá `localhost` (dev) y tu dominio de landing (prod).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Producción
 
-## Deploy on Vercel
+Cada empresa con plan Pro (o plan con `tiene_landing_page=true`) y subdominio asignado tendrá su landing en:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+`https://{subdomain}.tudominio.com`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+El endpoint público del backend es:
+
+`GET /api/empresas/public/{subdomain}/`
