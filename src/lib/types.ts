@@ -46,12 +46,22 @@ export type LandingEmpresaData = {
     cant_calif: number;
     trabajo_domicilio: boolean;
     trabajo_local: boolean;
+    /** Radio de cobertura en km (área de trabajo a domicilio). */
+    rango_mapa_km?: number;
   };
   admin_id: number;
   horarios: { dia_semana: string; hora_inicio: string; hora_fin: string }[];
   servicios: LandingServicio[];
   productos: LandingProducto[];
   profesiones: { id: number; nombre: string; logo_svg_url?: string }[];
+  /** Zonas de exclusión activas (sin cobertura). */
+  zonas_no_trabajo?: {
+    id: number;
+    nombre: string;
+    latitud: number;
+    longitud: number;
+    radio_km: number;
+  }[];
 };
 
 /** Formato estándar del backend (StandardizedResponseMiddleware). */

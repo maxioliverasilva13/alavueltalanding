@@ -8,6 +8,7 @@ import LandingSchedule from "@/components/landing/LandingSchedule";
 import LandingMap from "@/components/landing/LandingMap";
 import LandingProfessions from "@/components/landing/LandingProfessions";
 import LandingBooking from "@/components/landing/LandingBooking";
+import LandingCoverage from "@/components/landing/LandingCoverage";
 import { colors } from "@/lib/colors";
 import { empresaHasMap } from "@/lib/empresa-display";
 import { alavueltaIcons, empresaMetadata, loadingMetadata } from "@/lib/metadata";
@@ -49,7 +50,7 @@ export default async function HomePage() {
     );
   }
 
-  const { empresa, horarios, profesiones } = data;
+  const { empresa, horarios, profesiones, zonas_no_trabajo } = data;
   const showMap = empresaHasMap(empresa);
 
   return (
@@ -75,6 +76,8 @@ export default async function HomePage() {
           {showMap && <LandingMap empresa={empresa} />}
           {horarios.length > 0 && <LandingSchedule horarios={horarios} />}
         </section>
+
+        <LandingCoverage empresa={empresa} zonas={zonas_no_trabajo} />
       </div>
 
       <footer className="mt-4 border-t py-10 text-center text-xs text-gray-400" style={{ borderColor: colors.border }}>
