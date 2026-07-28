@@ -9,6 +9,7 @@ import LandingMap from "@/components/landing/LandingMap";
 import LandingProfessions from "@/components/landing/LandingProfessions";
 import LandingBooking from "@/components/landing/LandingBooking";
 import LandingCoverage from "@/components/landing/LandingCoverage";
+import LandingJsonLd from "@/components/landing/LandingJsonLd";
 import { colors } from "@/lib/colors";
 import { empresaHasMap } from "@/lib/empresa-display";
 import { alavueltaIcons, empresaMetadata, loadingMetadata } from "@/lib/metadata";
@@ -55,6 +56,7 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen" style={{ background: colors.background }}>
+      <LandingJsonLd data={data} />
       <div className="relative">
         <LandingTopBar />
         <LandingHero empresa={empresa} />
@@ -81,8 +83,15 @@ export default async function HomePage() {
       </div>
 
       <footer className="mt-4 border-t py-10 text-center text-xs text-gray-400" style={{ borderColor: colors.border }}>
-        <p>© {new Date().getFullYear()} {empresa.nombre}</p>
-        <p className="mt-1 opacity-70">Powered by Fixeo</p>
+        <p>
+          © {new Date().getFullYear()} {empresa.nombre}
+          {empresa.ubicacion ? ` · ${empresa.ubicacion}` : ""}
+        </p>
+        <p className="mt-1 opacity-70">
+          Landing pública en ALaVuelta
+          {empresa.vende_servicios ? " · Servicios" : ""}
+          {empresa.vende_productos ? " · Productos" : ""}
+        </p>
       </footer>
     </main>
   );

@@ -14,8 +14,18 @@ const geistMono = Geist_Mono({
 
 /** Sin icons acá: el favicon lo resuelve `app/icon.tsx` por subdominio (logo de la empresa). */
 export const metadata: Metadata = {
-  title: "ALaVuelta",
-  description: "Reservá servicios y pedí productos",
+  metadataBase: new URL(
+    `https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN || "alavueltaapp.pro"}`
+  ),
+  title: {
+    default: "ALaVuelta",
+    template: "%s",
+  },
+  description: "Reservá servicios y pedí productos cerca tuyo",
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

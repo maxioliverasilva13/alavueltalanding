@@ -33,12 +33,19 @@ Opciones en desarrollo:
 
 En Firebase Console → Authentication → Settings → Authorized domains, alcanza con agregar `app.alavueltaapp.pro` (y `localhost` en dev). No hace falta cada subdominio de cliente.
 
-## Producción
+## SEO (landings por subdominio)
 
-Cada empresa con plan Pro (o plan con `tiene_landing_page=true`) y subdominio asignado tendrá su landing en:
+Cada empresa tiene URL canónica `https://{subdomain}.alavueltaapp.pro` con:
 
-`https://{subdomain}.alavueltaapp.pro`
+- Metadata (title, description, Open Graph, Twitter, canonical)
+- JSON-LD `LocalBusiness` (dirección, geo, horarios, rating, ofertas)
+- `robots.txt` y `sitemap.xml` por host
 
-El endpoint público del backend es:
+**Para aparecer en Google** (no lo garantiza el código solo):
 
-`GET /api/empresas/public/{subdomain}/`
+1. Deploy en HTTPS con el dominio real
+2. [Google Search Console](https://search.google.com/search-console) → agregar la propiedad del dominio `alavueltaapp.pro` (o cada subdominio) y pedir indexación de la URL
+3. Ideal: perfil de [Google Business Profile](https://business.google.com/) con el mismo nombre/dirección y link a la landing
+4. Contenido único: título, slogan y descripción bien cargados en la config de landing
+
+Probar rich results: [Rich Results Test](https://search.google.com/test/rich-results) con la URL pública.
