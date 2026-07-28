@@ -3,8 +3,8 @@
 import { FormEvent, useState } from "react";
 import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import axios from "axios";
-import { loginWithGoogle } from "@/lib/firebase";
-import { emailLogin, persistLoginTokens, socialLogin } from "@/lib/api";
+import { emailLogin, persistLoginTokens } from "@/lib/api";
+import { loginWithGoogleViaAppBridge } from "@/lib/google-auth-bridge";
 import { colors } from "@/lib/colors";
 
 type Props = {
@@ -61,14 +61,9 @@ export default function LoginModal({ open, onClose, onSuccess }: Props) {
     setSocialLoading(true);
     setError("");
     try {
-      const cred = await loginWithGoogle();
-      const response = await socialLogin({
-        firebase_token: cred.firebaseToken,
-        email: cred.email,
-        nombre: cred.nombre,
-        foto_url: cred.foto_url,
-      });
-      finishLogin(response?.tokens);
+      // Popup en app.alavueltaapp.pro (autorizado en Firebase); la landing no pierde el booking.
+      const tokens = await loginWithGoogleViaAppBridge();
+      finishLogin(tokens);
     } catch (e: unknown) {
       setError(loginErrorMessage(e));
     } finally {
@@ -167,7 +162,7 @@ export default function LoginModal({ open, onClose, onSuccess }: Props) {
         <button
           type="button"
           disabled={loading || socialLoading}
-          onClick={handleGoogle}
+          onClick={() => void handleGoogle()}
           className="flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-gray-200 font-semibold text-gray-800 transition hover:bg-gray-50 disabled:opacity-60"
         >
           {socialLoading ? (

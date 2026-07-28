@@ -29,7 +29,9 @@ Opciones en desarrollo:
   - `AUTH_DOMAIN` = `{PROJECT_ID}.firebaseapp.com`
   - `APP_ID` debe ser el de la **app Web** en Firebase Console (`1:…:web:…`), no el `mobilesdk_app_id` Android
 
-En Firebase Console → Authentication → Settings → Authorized domains, agregá `localhost` (dev) y tu dominio de landing (prod).
+**Google en landings (wildcard):** Firebase no permite `*.alavueltaapp.pro`. El botón de Google abre un popup en `NEXT_PUBLIC_APP_URL` (`/auth/landing-bridge`), hace el login ahí (dominio autorizado) y devuelve los tokens a la landing por `postMessage` sin perder el carrito/reserva.
+
+En Firebase Console → Authentication → Settings → Authorized domains, alcanza con agregar `app.alavueltaapp.pro` (y `localhost` en dev). No hace falta cada subdominio de cliente.
 
 ## Producción
 
