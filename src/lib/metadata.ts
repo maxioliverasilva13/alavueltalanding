@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import type { LandingEmpresaData } from "./types";
-import { empresaDisplayTitle, empresaDisplayDescription } from "./empresa-display";
+import {
+  empresaDisplayDescription,
+  empresaDisplayTitle,
+  empresaLogoPhoto,
+} from "./empresa-display";
 
 export const alavueltaIcons: Metadata["icons"] = {
   icon: [
@@ -18,10 +22,8 @@ export const loadingMetadata: Metadata = {
 
 export function empresaMetadata(data: LandingEmpresaData): Metadata {
   const { empresa } = data;
-  const iconUrl =
-    empresa.landing_foto_url?.trim() ||
-    empresa.rounded_foto_url ||
-    empresa.foto_url;
+  // Favicon / icono de pestaña: logo o foto de la empresa (no la portada).
+  const iconUrl = empresaLogoPhoto(empresa);
 
   return {
     title: empresaDisplayTitle(empresa),
@@ -32,6 +34,7 @@ export function empresaMetadata(data: LandingEmpresaData): Metadata {
       ? {
           icon: [{ url: iconUrl }],
           apple: [{ url: iconUrl }],
+          shortcut: iconUrl,
         }
       : alavueltaIcons,
   };
