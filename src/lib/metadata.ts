@@ -17,25 +17,24 @@ export const alavueltaIcons: Metadata["icons"] = {
 export const loadingMetadata: Metadata = {
   title: "Loading",
   description: "Reservá servicios y pedí productos",
-  icons: alavueltaIcons,
 };
 
 export function empresaMetadata(data: LandingEmpresaData): Metadata {
   const { empresa } = data;
-  // Favicon / icono de pestaña: logo o foto de la empresa (no la portada).
-  const iconUrl = empresaLogoPhoto(empresa);
+  const title = empresaDisplayTitle(empresa);
+  const description =
+    empresaDisplayDescription(empresa) ||
+    `Reservá servicios y pedí productos en ${empresa.nombre}`;
+  const logo = empresaLogoPhoto(empresa);
 
   return {
-    title: empresaDisplayTitle(empresa),
-    description:
-      empresaDisplayDescription(empresa) ||
-      `Reservá servicios y pedí productos en ${empresa.nombre}`,
-    icons: iconUrl
-      ? {
-          icon: [{ url: iconUrl }],
-          apple: [{ url: iconUrl }],
-          shortcut: iconUrl,
-        }
-      : alavueltaIcons,
+    title,
+    description,
+    // El favicon real lo genera `app/icon.tsx` (mismo origen). openGraph usa el logo si hay.
+    openGraph: {
+      title,
+      description,
+      ...(logo ? { images: [{ url: logo }] } : {}),
+    },
   };
 }

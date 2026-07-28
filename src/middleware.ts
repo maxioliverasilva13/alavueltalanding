@@ -40,6 +40,15 @@ export function middleware(request: NextRequest) {
     subdomain = process.env.NEXT_PUBLIC_DEFAULT_SUBDOMAIN || null;
   }
 
+  // Muchos navegadores piden /favicon.ico directo; reescribimos al icon dinámico por empresa.
+  if (url.pathname === "/favicon.ico") {
+    const rewriteUrl = url.clone();
+    rewriteUrl.pathname = "/icon";
+    const response = NextResponse.rewrite(rewriteUrl);
+    if (subdomain) response.headers.set("x-subdomain", subdomain);
+    return response;
+  }
+
   const response = NextResponse.next();
   if (subdomain) {
     response.headers.set("x-subdomain", subdomain);
@@ -48,5 +57,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image).*)"],
 };

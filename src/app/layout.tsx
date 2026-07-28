@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { loadingMetadata } from "@/lib/metadata";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,7 +12,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = loadingMetadata;
+/** Sin icons acá: el favicon lo resuelve `app/icon.tsx` por subdominio (logo de la empresa). */
+export const metadata: Metadata = {
+  title: "ALaVuelta",
+  description: "Reservá servicios y pedí productos",
+};
 
 export default function RootLayout({
   children,
