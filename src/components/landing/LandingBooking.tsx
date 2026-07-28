@@ -34,8 +34,9 @@ import {
 } from "@/lib/api";
 import type { ApiResponse } from "@/lib/types";
 import { formatPrice } from "@/lib/format";
+import { LANDING_GO_BOOKING, type BookingMode } from "./LandingHeroCtas";
 
-type Mode = "servicios" | "productos";
+type Mode = BookingMode;
 
 type Props = {
   data: LandingEmpresaData;
@@ -102,6 +103,37 @@ export default function LandingBooking({ data }: Props) {
     restoreAuthFromStorage();
     setIsLoggedIn(isAuthenticated());
   }, []);
+
+  useEffect(() => {
+    const applyMode = (next: Mode) => {
+      if (next === "servicios" && !empresa.vende_servicios) return;
+      if (next === "productos" && !empresa.vende_productos) return;
+      setMode(next);
+      setStep(0);
+      setError("");
+    };
+
+    const onGoBooking = (event: Event) => {
+      const detail = (event as CustomEvent<{ mode?: Mode }>).detail;
+      if (detail?.mode === "servicios" || detail?.mode === "productos") {
+        applyMode(detail.mode);
+      }
+    };
+
+    const syncFromHash = () => {
+      const hash = window.location.hash.replace(/^#/, "").toLowerCase();
+      if (hash === "servicios" || hash === "reservar-servicios") applyMode("servicios");
+      if (hash === "productos" || hash === "reservar-productos") applyMode("productos");
+    };
+
+    syncFromHash();
+    window.addEventListener(LANDING_GO_BOOKING, onGoBooking);
+    window.addEventListener("hashchange", syncFromHash);
+    return () => {
+      window.removeEventListener(LANDING_GO_BOOKING, onGoBooking);
+      window.removeEventListener("hashchange", syncFromHash);
+    };
+  }, [empresa.vende_servicios, empresa.vende_productos]);
 
   const filteredServicios = useMemo(() => {
     if (!selectedProfesionId) return servicios;
@@ -524,7 +556,7 @@ export default function LandingBooking({ data }: Props) {
           {mode === "productos" && empresa.vende_productos && (
             <>
               {step === 0 && (
-                <div id="productos" className="space-y-4">
+                <div className="space-y-4">
                   {cartLoading && <p className="text-sm text-gray-400">Actualizando carrito...</p>}
                   <div className="grid gap-4 sm:grid-cols-2">
                     {productos.map((p) => (

@@ -8,6 +8,7 @@ import {
   empresaDisplayTitle,
   empresaLogoPhoto,
 } from "@/lib/empresa-display";
+import LandingHeroCtas from "./LandingHeroCtas";
 
 type Props = {
   empresa: LandingEmpresaData["empresa"];
@@ -96,26 +97,11 @@ export default function LandingHero({ empresa, showCta = true }: Props) {
             )}
           </div>
 
-          {showCta && (empresa.vende_servicios || empresa.vende_productos) && (
-            <div className="mt-8 flex flex-wrap gap-3">
-              {empresa.vende_servicios && (
-                <a
-                  href="#reservar"
-                  className="inline-flex h-11 items-center rounded-xl px-6 text-sm font-semibold text-gray-900 shadow-lg transition hover:scale-[1.02] hover:opacity-95"
-                  style={{ background: colors.white }}
-                >
-                  Reservar servicio
-                </a>
-              )}
-              {empresa.vende_productos && (
-                <a
-                  href="#productos"
-                  className="inline-flex h-11 items-center rounded-xl border border-white/30 bg-white/10 px-6 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20"
-                >
-                  Ver productos
-                </a>
-              )}
-            </div>
+          {showCta && (
+            <LandingHeroCtas
+              vendeServicios={empresa.vende_servicios}
+              vendeProductos={empresa.vende_productos}
+            />
           )}
         </div>
       </div>
