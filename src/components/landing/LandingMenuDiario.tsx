@@ -199,10 +199,12 @@ export default function LandingMenuDiario({
     setTipoEntrega(defaultTipoEntrega(cartDeliveryItems, effectiveCompany));
   }, [cartDeliveryItems, companyDelivery, showDomicilioEffective]);
 
+  const cartItems = carrito?.items ?? [];
+
   const getCartQty = (productoId: number) =>
-    carrito?.items
-      ?.filter((i) => i.producto === productoId)
-      .reduce((acc, i) => acc + i.cantidad, 0) ?? 0;
+    cartItems
+      .filter((i) => i.producto === productoId)
+      .reduce((acc, i) => acc + i.cantidad, 0);
 
   const tryChangeDia = (dia: number) => {
     if (cartLockedDia != null && cartLockedDia !== dia) {
@@ -263,17 +265,24 @@ export default function LandingMenuDiario({
     let cart = carrito ?? (await getCarritoByEmpresa(empresa.id));
     if (!cart) return;
 
-    const existing = cart.items.find(
+    const existing = (cart.items ?? []).find(
       (i) => i.producto === productoId && (i.variante ?? null) === varianteId,
     );
 
     try {
       if (existing) {
-        cart = (await actualizarItemCarrito(cart.id, productoId, existing.cantidad + 1, varianteId)) ?? cart;
+        cart = (await actualizarItemCarrito(
+          cart.id,
+          productoId,
+          existing.cantidad + 1,
+          empresa.id,
+          varianteId,
+        )) ?? cart;
       } else {
         cart = (await agregarAlCarrito(cart.id, productoId, 1, {
           varianteId,
           fechaMenu,
+          empresaId: empresa.id,
         })) ?? cart;
       }
       setCarrito(cart);
@@ -293,7 +302,7 @@ export default function LandingMenuDiario({
     let cart = carrito ?? (await getCarritoByEmpresa(empresa.id));
     if (!cart) return;
 
-    const lines = cart.items.filter((i) => i.producto === producto.id);
+    const lines = (cart.items ?? []).filter((i) => i.producto === producto.id);
     if (!lines.length && qty > 0) {
       openAddFlow(producto);
       return;
@@ -303,9 +312,9 @@ export default function LandingMenuDiario({
       const line = lines[lines.length - 1];
       const varianteId = line?.variante ?? null;
       if (qty <= 0 && line) {
-        cart = (await eliminarItemCarrito(cart.id, producto.id, varianteId)) ?? cart;
+        cart = (await eliminarItemCarrito(cart.id, producto.id, empresa.id, varianteId)) ?? cart;
       } else if (line) {
-        cart = (await actualizarItemCarrito(cart.id, producto.id, qty, varianteId)) ?? cart;
+        cart = (await actualizarItemCarrito(cart.id, producto.id, qty, empresa.id, varianteId)) ?? cart;
       }
       setCarrito(cart);
     } catch (e) {
@@ -332,8 +341,8 @@ export default function LandingMenuDiario({
     }
   };
 
-  const cartItemCount = carrito?.items.reduce((a, i) => a + i.cantidad, 0) ?? 0;
-  const cartTotal = carrito?.items.reduce((a, i) => a + Number(i.subtotal), 0) ?? 0;
+  const cartItemCount = cartItems.reduce((a, i) => a + i.cantidad, 0);
+  const cartTotal = cartItems.reduce((a, i) => a + Number(i.subtotal), 0);
 
   return (
     <div className="space-y-4">

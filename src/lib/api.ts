@@ -167,51 +167,59 @@ export async function crearTrabajo(body: Record<string, unknown>) {
   return unwrapApiData(data);
 }
 
+function normalizeCarrito(cart: Carrito | null): Carrito | null {
+  if (!cart) return null;
+  return { ...cart, items: cart.items ?? [] };
+}
+
+async function reloadCarrito(empresaId: number): Promise<Carrito | null> {
+  return normalizeCarrito(await getCarritoByEmpresa(empresaId));
+}
+
 export async function getCarritoByEmpresa(empresaId: number): Promise<Carrito | null> {
   const { data } = await api.get<ApiResponse<Carrito>>(`/carritos/empresa/${empresaId}/`);
-  return unwrapApiData(data);
+  return normalizeCarrito(unwrapApiData(data));
 }
 
 export async function agregarAlCarrito(
   carritoId: number,
   productoId: number,
   cantidad: number,
-  opts?: { varianteId?: number | null; fechaMenu?: string | null },
+  opts: { varianteId?: number | null; fechaMenu?: string | null; empresaId: number },
 ) {
-  const { data } = await api.post<ApiResponse<Carrito>>(`/carritos/${carritoId}/agregar-item/`, {
+  await api.post(`/carritos/${carritoId}/agregar-item/`, {
     producto_id: productoId,
     cantidad,
-    ...(opts?.varianteId != null ? { variante_id: opts.varianteId } : {}),
-    ...(opts?.fechaMenu ? { fecha_menu: opts.fechaMenu } : {}),
+    ...(opts.varianteId != null ? { variante_id: opts.varianteId } : {}),
+    ...(opts.fechaMenu ? { fecha_menu: opts.fechaMenu } : {}),
   });
-  return unwrapApiData(data);
+  return reloadCarrito(opts.empresaId);
 }
 
 export async function actualizarItemCarrito(
   carritoId: number,
   productoId: number,
   cantidad: number,
+  empresaId: number,
   varianteId?: number | null,
 ) {
-  const { data } = await api.post<ApiResponse<Carrito>>(`/carritos/${carritoId}/actualizar-item/`, {
+  await api.post(`/carritos/${carritoId}/actualizar-item/`, {
     producto_id: productoId,
     cantidad,
     ...(varianteId != null ? { variante_id: varianteId } : {}),
   });
-  return unwrapApiData(data);
+  return reloadCarrito(empresaId);
 }
 
 export async function eliminarItemCarrito(
   carritoId: number,
   productoId: number,
+  empresaId: number,
   varianteId?: number | null,
 ) {
   const params = varianteId != null ? { variante_id: varianteId } : undefined;
-  const { data } = await api.delete<ApiResponse<Carrito>>(
-    `/carritos/${carritoId}/eliminar-item/${productoId}/`,
-    { params },
-  );
-  return unwrapApiData(data);
+  await api.delete(`/carritos/${carritoId}/eliminar-item/${productoId}/`, { params });
+  return reloadCarrito(empresaId);
 }
 
 export async function checkoutCarrito(

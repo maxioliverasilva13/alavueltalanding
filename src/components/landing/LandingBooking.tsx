@@ -248,18 +248,18 @@ export default function LandingBooking({ data }: Props) {
     if (!cart) return;
 
     if (qty <= 0) {
-      cart = (await eliminarItemCarrito(cart.id, producto.id)) ?? cart;
+      cart = (await eliminarItemCarrito(cart.id, producto.id, empresa.id)) ?? cart;
     } else {
-      const existing = cart.items.find((i) => i.producto === producto.id);
+      const existing = (cart.items ?? []).find((i) => i.producto === producto.id);
       cart = existing
-        ? ((await actualizarItemCarrito(cart.id, producto.id, qty)) ?? cart)
-        : ((await agregarAlCarrito(cart.id, producto.id, qty)) ?? cart);
+        ? ((await actualizarItemCarrito(cart.id, producto.id, qty, empresa.id)) ?? cart)
+        : ((await agregarAlCarrito(cart.id, producto.id, qty, { empresaId: empresa.id })) ?? cart);
     }
     setCarrito(cart);
   };
 
   const getProductQty = (productoId: number) =>
-    carrito?.items.find((i) => i.producto === productoId)?.cantidad ?? 0;
+    (carrito?.items ?? []).find((i) => i.producto === productoId)?.cantidad ?? 0;
 
   const submitOrder = async () => {
     setSubmitting(true);
@@ -609,7 +609,7 @@ export default function LandingBooking({ data }: Props) {
                   </div>
                   {(carrito?.items.length ?? 0) > 0 && (
                     <button type="button" onClick={() => setStep(1)} className="h-12 w-full rounded-2xl font-semibold text-white" style={{ background: colors.primary }}>
-                      Ver carrito ({carrito?.items.reduce((a, i) => a + i.cantidad, 0)})
+                      Ver carrito ({(carrito?.items ?? []).reduce((a, i) => a + i.cantidad, 0)})
                     </button>
                   )}
                 </div>
