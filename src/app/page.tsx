@@ -91,6 +91,7 @@ export default async function HomePage() {
           Landing pública en ALaVuelta
           {empresa.vende_servicios ? " · Servicios" : ""}
           {empresa.vende_productos ? " · Productos" : ""}
+          {empresa.vende_menu_diario ? " · Menú diario" : ""}
         </p>
       </footer>
     </main>

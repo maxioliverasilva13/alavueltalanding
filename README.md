@@ -1,6 +1,7 @@
 # Fixeo Landing
 
-Landing page server-side (Next.js) por subdominio para empresas con plan que incluye `tiene_landing_page`.
+Landing page server-side (Next.js) por subdominio para empresas con landing activa
+(`empresa.tiene_landing_page` **o** plan con `tiene_landing_page`).
 
 ## Desarrollo
 

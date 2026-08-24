@@ -9,6 +9,14 @@ export type LandingServicio = {
   profesion_detalle?: { id: number; nombre: string; logo_svg_url?: string };
 };
 
+export type ProductoVariante = {
+  id?: number;
+  nombre: string;
+  precio_extra: string | number;
+  activo?: boolean;
+  orden?: number;
+};
+
 export type LandingProducto = {
   id: number;
   nombre: string;
@@ -17,6 +25,15 @@ export type LandingProducto = {
   divisa: string;
   foto?: string;
   agotado?: boolean;
+  es_menu_diario?: boolean;
+  dias_semana?: number[];
+  dias_detalle?: { dia_semana: number; activo: boolean }[];
+  activo_en_dia?: boolean | null;
+  variantes?: ProductoVariante[];
+  acepta_domicilio?: boolean;
+  acepta_retiro?: boolean;
+  categoria?: number | null;
+  categoria_nombre?: string | null;
 };
 
 export type LandingEmpresaData = {
@@ -35,6 +52,7 @@ export type LandingEmpresaData = {
     compartir_ubicacion_mapa?: boolean;
     vende_productos: boolean;
     vende_servicios: boolean;
+    vende_menu_diario: boolean;
     acepta_efectivo: boolean;
     acepta_tarjeta: boolean;
     is_mercadopago_vinculado: boolean;
@@ -48,6 +66,8 @@ export type LandingEmpresaData = {
     trabajo_local: boolean;
     /** Radio de cobertura en km (área de trabajo a domicilio). */
     rango_mapa_km?: number;
+    /** Override admin: landing aunque el plan no la incluya. */
+    tiene_landing_page?: boolean;
   };
   admin_id: number;
   horarios: { dia_semana: string; hora_inicio: string; hora_fin: string }[];

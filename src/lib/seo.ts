@@ -49,7 +49,12 @@ function buildSeoDescription(data: LandingEmpresaData): string {
     else if (servicios.length) offers.push(`${servicios.length} servicios disponibles`);
   }
   if (empresa.vende_productos && productos.length) {
-    offers.push(`${productos.length} productos`);
+    offers.push(`${productos.filter((p) => !p.es_menu_diario).length || productos.length} productos`);
+  }
+  if (empresa.vende_menu_diario) {
+    const menuCount = productos.filter((p) => p.es_menu_diario).length;
+    if (menuCount) offers.push(`Menú diario con ${menuCount} platos`);
+    else offers.push("Menú diario disponible");
   }
   if (offers.length) parts.push(offers.join(". "));
 
@@ -262,11 +267,31 @@ export function buildLocalBusinessJsonLd(data: LandingEmpresaData): Record<strin
   }
 
   if (empresa.vende_productos) {
-    for (const p of productos.slice(0, 20)) {
+    for (const p of productos.filter((item) => !item.es_menu_diario).slice(0, 20)) {
       offers.push({
         "@type": "Offer",
         itemOffered: {
           "@type": "Product",
+          name: p.nombre,
+          ...(p.descripcion ? { description: p.descripcion } : {}),
+          ...(p.foto ? { image: p.foto } : {}),
+        },
+        price: Number(p.precio),
+        priceCurrency: p.divisa || empresa.currency || "UYU",
+        availability: p.agotado
+          ? "https://schema.org/OutOfStock"
+          : "https://schema.org/InStock",
+        url,
+      });
+    }
+  }
+
+  if (empresa.vende_menu_diario) {
+    for (const p of productos.filter((item) => item.es_menu_diario).slice(0, 20)) {
+      offers.push({
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "MenuItem",
           name: p.nombre,
           ...(p.descripcion ? { description: p.descripcion } : {}),
           ...(p.foto ? { image: p.foto } : {}),

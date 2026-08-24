@@ -10,6 +10,7 @@ import {
   MapPin,
   Package,
   Store,
+  UtensilsCrossed,
   Wrench,
 } from "lucide-react";
 import type { LandingEmpresaData, LandingProducto, LandingServicio } from "@/lib/types";
@@ -20,6 +21,7 @@ import CardProduct from "../ui/CardProduct";
 import Calendar from "../ui/Calendar";
 import FormStepper from "../ui/FormStepper";
 import PaymentMethodPicker from "../ui/PaymentMethodPicker";
+import LandingMenuDiario from "./LandingMenuDiario";
 import {
   agregarAlCarrito,
   actualizarItemCarrito,
@@ -71,9 +73,20 @@ function apiErrorMessage(e: unknown): string {
   return "No se pudo completar. Intentá de nuevo.";
 }
 
+function defaultBookingMode(empresa: LandingEmpresaData["empresa"]): Mode {
+  if (empresa.vende_servicios) return "servicios";
+  if (empresa.vende_productos) return "productos";
+  if (empresa.vende_menu_diario) return "menu_diario";
+  return "productos";
+}
+
 export default function LandingBooking({ data }: Props) {
-  const { empresa, admin_id, servicios, productos, profesiones } = data;
-  const [mode, setMode] = useState<Mode>(empresa.vende_servicios ? "servicios" : "productos");
+  const { empresa, admin_id, servicios, productos, profesiones, zonas_no_trabajo } = data;
+  const productosRetail = useMemo(
+    () => productos.filter((p) => !p.es_menu_diario),
+    [productos],
+  );
+  const [mode, setMode] = useState<Mode>(() => defaultBookingMode(empresa));
   const [step, setStep] = useState(0);
   const [selectedProfesionId, setSelectedProfesionId] = useState<number>(profesiones[0]?.id ?? 0);
   const [selectedServices, setSelectedServices] = useState<LandingServicio[]>([]);
@@ -108,6 +121,7 @@ export default function LandingBooking({ data }: Props) {
     const applyMode = (next: Mode) => {
       if (next === "servicios" && !empresa.vende_servicios) return;
       if (next === "productos" && !empresa.vende_productos) return;
+      if (next === "menu_diario" && !empresa.vende_menu_diario) return;
       setMode(next);
       setStep(0);
       setError("");
@@ -115,7 +129,11 @@ export default function LandingBooking({ data }: Props) {
 
     const onGoBooking = (event: Event) => {
       const detail = (event as CustomEvent<{ mode?: Mode }>).detail;
-      if (detail?.mode === "servicios" || detail?.mode === "productos") {
+      if (
+        detail?.mode === "servicios" ||
+        detail?.mode === "productos" ||
+        detail?.mode === "menu_diario"
+      ) {
         applyMode(detail.mode);
       }
     };
@@ -124,6 +142,7 @@ export default function LandingBooking({ data }: Props) {
       const hash = window.location.hash.replace(/^#/, "").toLowerCase();
       if (hash === "servicios" || hash === "reservar-servicios") applyMode("servicios");
       if (hash === "productos" || hash === "reservar-productos") applyMode("productos");
+      if (hash === "menu-diario" || hash === "menu" || hash === "reservar-menu") applyMode("menu_diario");
     };
 
     syncFromHash();
@@ -133,7 +152,7 @@ export default function LandingBooking({ data }: Props) {
       window.removeEventListener(LANDING_GO_BOOKING, onGoBooking);
       window.removeEventListener("hashchange", syncFromHash);
     };
-  }, [empresa.vende_servicios, empresa.vende_productos]);
+  }, [empresa.vende_servicios, empresa.vende_productos, empresa.vende_menu_diario]);
 
   const filteredServicios = useMemo(() => {
     if (!selectedProfesionId) return servicios;
@@ -283,7 +302,7 @@ export default function LandingBooking({ data }: Props) {
     await submitOrder();
   };
 
-  if (!empresa.vende_servicios && !empresa.vende_productos) return null;
+  if (!empresa.vende_servicios && !empresa.vende_productos && !empresa.vende_menu_diario) return null;
 
   if (success) {
     return (
@@ -293,11 +312,19 @@ export default function LandingBooking({ data }: Props) {
         <p className="mx-auto mt-2 max-w-sm text-gray-500">
           {mode === "servicios"
             ? "Tu reserva fue enviada. Te confirmaremos a la brevedad."
-            : "Tu pedido fue enviado correctamente."}
+            : mode === "menu_diario"
+              ? "Tu pedido de menú fue enviado correctamente."
+              : "Tu pedido fue enviado correctamente."}
         </p>
       </section>
     );
   }
+
+  const modeCount = [
+    empresa.vende_servicios,
+    empresa.vende_productos,
+    empresa.vende_menu_diario,
+  ].filter(Boolean).length;
 
   const steps = mode === "servicios" ? SERVICE_STEPS : PRODUCT_STEPS;
   const stepLabel = steps[step]?.label ?? "";
@@ -314,32 +341,38 @@ export default function LandingBooking({ data }: Props) {
           <p className="mt-1 text-sm text-gray-500">Mismo flujo que en la app de Alavuelta</p>
         </div>
 
-        {empresa.vende_servicios && empresa.vende_productos && (
+        {modeCount > 1 && (
           <div className="flex gap-2 border-b p-4" style={{ borderColor: colors.border }}>
-            {(["servicios", "productos"] as Mode[]).map((m) => (
+            {([
+              { key: "servicios" as Mode, label: "Servicios", icon: Wrench, show: empresa.vende_servicios },
+              { key: "productos" as Mode, label: "Productos", icon: Package, show: empresa.vende_productos },
+              { key: "menu_diario" as Mode, label: "Menú", icon: UtensilsCrossed, show: empresa.vende_menu_diario },
+            ]).filter((t) => t.show).map(({ key, label, icon: Icon }) => (
               <button
-                key={m}
+                key={key}
                 type="button"
-                onClick={() => { setMode(m); setStep(0); setError(""); }}
+                onClick={() => { setMode(key); setStep(0); setError(""); }}
                 className="flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold"
                 style={{
-                  background: mode === m ? colors.primary : "#f8f9fc",
-                  color: mode === m ? colors.white : "#374151",
+                  background: mode === key ? colors.primary : "#f8f9fc",
+                  color: mode === key ? colors.white : "#374151",
                 }}
               >
-                {m === "servicios" ? <Wrench className="h-4 w-4" /> : <Package className="h-4 w-4" />}
-                {m === "servicios" ? "Servicios" : "Productos"}
+                <Icon className="h-4 w-4" />
+                {label}
               </button>
             ))}
           </div>
         )}
 
-        <div className="border-b px-4 py-4" style={{ borderColor: colors.border }}>
-          <FormStepper steps={steps} currentIndex={step} />
-        </div>
+        {mode !== "menu_diario" && (
+          <div className="border-b px-4 py-4" style={{ borderColor: colors.border }}>
+            <FormStepper steps={steps} currentIndex={step} />
+          </div>
+        )}
 
         <div className="px-6 py-5">
-          {step > 0 && (
+          {mode !== "menu_diario" && step > 0 && (
             <button
               type="button"
               onClick={() => setStep((s) => s - 1)}
@@ -559,7 +592,7 @@ export default function LandingBooking({ data }: Props) {
                 <div className="space-y-4">
                   {cartLoading && <p className="text-sm text-gray-400">Actualizando carrito...</p>}
                   <div className="grid gap-4 sm:grid-cols-2">
-                    {productos.map((p) => (
+                    {productosRetail.map((p) => (
                       <CardProduct
                         key={p.id}
                         id={p.id}
@@ -623,6 +656,16 @@ export default function LandingBooking({ data }: Props) {
                 </div>
               )}
             </>
+          )}
+
+          {mode === "menu_diario" && empresa.vende_menu_diario && (
+            <LandingMenuDiario
+              empresa={empresa}
+              zonasNoTrabajo={zonas_no_trabajo}
+              isLoggedIn={isLoggedIn}
+              onRequireLogin={() => setShowLogin(true)}
+              onSuccess={() => setSuccess(true)}
+            />
           )}
         </div>
       </section>

@@ -12,6 +12,9 @@ export const api = axios.create({
 export type CarritoItem = {
   id: number;
   producto: number;
+  variante?: number | null;
+  variante_nombre?: string | null;
+  variante_precio_extra?: string | null;
   producto_nombre: string;
   producto_divisa?: string;
   cantidad: number;
@@ -26,6 +29,26 @@ export type Carrito = {
   items: CarritoItem[];
   total?: string;
   totales_por_divisa?: Record<string, string>;
+  fecha_menu?: string | null;
+};
+
+export type LandingProductoApi = {
+  id: number;
+  nombre: string;
+  descripcion?: string;
+  precio: string | number;
+  divisa: string;
+  foto?: string;
+  agotado?: boolean;
+  es_menu_diario?: boolean;
+  dias_semana?: number[];
+  dias_detalle?: { dia_semana: number; activo: boolean }[];
+  activo_en_dia?: boolean | null;
+  variantes?: { id?: number; nombre: string; precio_extra: string | number; activo?: boolean }[];
+  acepta_domicilio?: boolean;
+  acepta_retiro?: boolean;
+  categoria?: number | null;
+  categoria_nombre?: string | null;
 };
 
 function unwrapApiData<T>(payload: ApiResponse<T> | T): T | null {
@@ -113,6 +136,21 @@ export function notifyAuthChanged() {
 export type LandingUser = {
   nombre?: string;
   apellido?: string;
+  localizacion_principal?: {
+    localizacion_detalle?: {
+      latitud?: number | string | null;
+      longitud?: number | string | null;
+      isPrimary?: boolean;
+    } | null;
+  } | null;
+  localizaciones?: Array<{
+    es_principal?: boolean;
+    localizacion_detalle?: {
+      latitud?: number | string | null;
+      longitud?: number | string | null;
+      isPrimary?: boolean;
+    } | null;
+  }>;
 };
 
 export async function fetchCurrentUser(): Promise<LandingUser | null> {
@@ -134,37 +172,85 @@ export async function getCarritoByEmpresa(empresaId: number): Promise<Carrito | 
   return unwrapApiData(data);
 }
 
-export async function agregarAlCarrito(carritoId: number, productoId: number, cantidad: number) {
+export async function agregarAlCarrito(
+  carritoId: number,
+  productoId: number,
+  cantidad: number,
+  opts?: { varianteId?: number | null; fechaMenu?: string | null },
+) {
   const { data } = await api.post<ApiResponse<Carrito>>(`/carritos/${carritoId}/agregar-item/`, {
     producto_id: productoId,
     cantidad,
+    ...(opts?.varianteId != null ? { variante_id: opts.varianteId } : {}),
+    ...(opts?.fechaMenu ? { fecha_menu: opts.fechaMenu } : {}),
   });
   return unwrapApiData(data);
 }
 
-export async function actualizarItemCarrito(carritoId: number, productoId: number, cantidad: number) {
+export async function actualizarItemCarrito(
+  carritoId: number,
+  productoId: number,
+  cantidad: number,
+  varianteId?: number | null,
+) {
   const { data } = await api.post<ApiResponse<Carrito>>(`/carritos/${carritoId}/actualizar-item/`, {
     producto_id: productoId,
     cantidad,
+    ...(varianteId != null ? { variante_id: varianteId } : {}),
   });
   return unwrapApiData(data);
 }
 
-export async function eliminarItemCarrito(carritoId: number, productoId: number) {
-  const { data } = await api.delete<ApiResponse<Carrito>>(`/carritos/${carritoId}/eliminar-item/${productoId}/`);
+export async function eliminarItemCarrito(
+  carritoId: number,
+  productoId: number,
+  varianteId?: number | null,
+) {
+  const params = varianteId != null ? { variante_id: varianteId } : undefined;
+  const { data } = await api.delete<ApiResponse<Carrito>>(
+    `/carritos/${carritoId}/eliminar-item/${productoId}/`,
+    { params },
+  );
   return unwrapApiData(data);
 }
 
 export async function checkoutCarrito(
   carritoId: number,
   body: {
-    metodo_pago: "efectivo" | "mercadopago";
+    metodo_pago: "efectivo" | "mercadopago" | "transferencia";
     tipo_entrega?: "domicilio" | "retiro";
     notas?: string;
   }
 ) {
   const { data } = await api.post<ApiResponse<unknown>>(`/carritos/${carritoId}/checkout/`, body);
   return unwrapApiData(data);
+}
+
+function unwrapList<T>(payload: unknown): T[] {
+  if (payload && typeof payload === "object") {
+    const obj = payload as Record<string, unknown>;
+    if (obj.data && typeof obj.data === "object") {
+      const inner = obj.data as Record<string, unknown>;
+      if (Array.isArray(inner.results)) return inner.results as T[];
+      if (Array.isArray(inner)) return inner as T[];
+    }
+    if (Array.isArray(obj.results)) return obj.results as T[];
+    if (Array.isArray(obj.data)) return obj.data as T[];
+  }
+  if (Array.isArray(payload)) return payload as T[];
+  return [];
+}
+
+export async function listarProductosMenu(params: {
+  empresa_id: number;
+  dia_semana?: number;
+  categoria_id?: number;
+  search?: string;
+}): Promise<LandingProductoApi[]> {
+  const { data } = await api.get("/empresas/productos/", {
+    params: { ...params, es_menu_diario: true },
+  });
+  return unwrapList<LandingProductoApi>(data);
 }
 
 export async function fetchAvailableDays(params: {
