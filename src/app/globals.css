@@ -4,6 +4,32 @@
   --primary: #8972fd;
   --primary-dark: #6e57d8;
   --background: #f7f7fb;
+  --bottom-inset-for-nav: env(safe-area-inset-bottom, 0px);
+}
+
+html.cap-native.cap-android {
+  --bottom-inset-for-nav: max(env(safe-area-inset-bottom, 0px), 48px);
+}
+
+.bottom-sheet-overlay {
+  padding-bottom: var(--bottom-inset-for-nav);
+  box-sizing: border-box;
+}
+
+@media (min-width: 640px) {
+  .bottom-sheet-overlay {
+    padding-bottom: 0;
+  }
+}
+
+.bottom-sheet-panel {
+  padding-bottom: calc(var(--bottom-inset-for-nav) + 1.25rem);
+  box-sizing: border-box;
+}
+
+.bottom-sheet-footer {
+  padding-bottom: calc(var(--bottom-inset-for-nav) + 1rem);
+  box-sizing: border-box;
 }
 
 body {

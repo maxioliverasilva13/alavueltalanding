@@ -1,3 +1,9 @@
+export type ServicioImagen = {
+  id?: number;
+  url: string;
+  orden?: number;
+};
+
 export type LandingServicio = {
   id: number;
   nombre: string;
@@ -6,6 +12,7 @@ export type LandingServicio = {
   tiempo: number;
   notas?: string;
   foto?: string;
+  imagenes?: ServicioImagen[];
   profesion_detalle?: { id: number; nombre: string; logo_svg_url?: string };
 };
 
@@ -17,6 +24,12 @@ export type ProductoVariante = {
   orden?: number;
 };
 
+export type ProductoImagen = {
+  id?: number;
+  url: string;
+  orden?: number;
+};
+
 export type LandingProducto = {
   id: number;
   nombre: string;
@@ -24,6 +37,7 @@ export type LandingProducto = {
   precio: string | number;
   divisa: string;
   foto?: string;
+  imagenes?: ProductoImagen[];
   agotado?: boolean;
   es_menu_diario?: boolean;
   dias_semana?: number[];

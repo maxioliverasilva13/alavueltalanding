@@ -39,6 +39,7 @@ export type LandingProductoApi = {
   precio: string | number;
   divisa: string;
   foto?: string;
+  imagenes?: { id?: number; url: string; orden?: number }[];
   agotado?: boolean;
   es_menu_diario?: boolean;
   dias_semana?: number[];

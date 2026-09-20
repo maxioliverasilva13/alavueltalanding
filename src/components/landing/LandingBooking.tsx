@@ -412,7 +412,7 @@ export default function LandingBooking({ data }: Props) {
                         id={s.id}
                         name={s.nombre}
                         description={s.notas}
-                        photo={s.foto}
+                        photo={s.imagenes?.[0]?.url ?? s.foto}
                         price={s.precio}
                         currency={s.divisa}
                         timeInMinutes={s.tiempo}
@@ -598,7 +598,7 @@ export default function LandingBooking({ data }: Props) {
                         id={p.id}
                         name={p.nombre}
                         description={p.descripcion}
-                        photo={p.foto}
+                        photo={p.imagenes?.[0]?.url ?? p.foto}
                         price={p.precio}
                         currency={p.divisa}
                         soldOut={p.agotado}
